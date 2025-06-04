@@ -4,7 +4,7 @@ import qrcode
 from io import BytesIO
 
 # === BOT TOKEN ===
-BOT_TOKEN = 'PASTE_YOUR_BOT_TOKEN_HERE'
+BOT_TOKEN = '8015254595:AAFQ_n154sVd0wRiiiJkcsQtuFupDJukvgI'
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # === DATA SOURCE ===
