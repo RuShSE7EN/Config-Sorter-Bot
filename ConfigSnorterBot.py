@@ -41,15 +41,24 @@ def send_welcome(message):
 @bot.message_handler(commands=['get'])
 def send_config(message):
     try:
-        res = requests.get(SOURCE_URL)
-        links = [line.strip() for line in res.text.split('\n') if line.strip().startswith('vless://')]
-        if not links:
-            bot.reply_to(message, "🚫 هیچ کانفیگ VLESS‌ای پیدا نشد. احتمالاً سورس خالیه یا فیلتر خورده.")
+        SOURCES = [
+            'https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt',
+            'https://raw.githubusercontent.com/AzadNetCH/Clash/main/vless.txt',
+            'https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.raw.txt'
+        ]
+
+        config = None
+        for url in SOURCES:
+            res = requests.get(url, timeout=5)
+            lines = [line.strip() for line in res.text.split('\n') if line.strip().startswith('vless://')]
+            if lines:
+                config = random.choice(lines)
+                break  # وقتی پیدا شد، بپر بیرون
+
+        if not config:
+            bot.reply_to(message, "🚫 هیچ کانفیگ VLESS‌ای از هیچ‌کدوم از منابع پیدا نشد. شاید فردا بهتر باشه :)")
             return
 
-        config = links[0]  # اولین کانفیگ سالم
-
-        # ساخت QR Code
         img = qrcode.make(config)
         bio = BytesIO()
         bio.name = 'qrcode.png'
@@ -60,11 +69,3 @@ def send_config(message):
         bot.send_photo(message.chat.id, bio, caption="📱 این QR Code رو توی Hiddify اسکن کن.")
     except Exception as e:
         bot.reply_to(message, f"💥 خطا در دریافت کانفیگ:\n{str(e)}")
-
-# === اجرای Flask و ثبت Webhook ===
-if __name__ == '__main__':
-    bot.remove_webhook()
-    webhook_url = f"{WEBHOOK_HOST}/{BOT_TOKEN}"
-    bot.set_webhook(url=webhook_url)
-    print(f"Webhook set to: {webhook_url}")
-    app.run(host='0.0.0.0', port=8000)
